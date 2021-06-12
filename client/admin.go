@@ -24,7 +24,7 @@ type appClient struct {
 }
 
 type AdminClient struct {
-	*types.AdminParams
+	metadata *types.AdminParams
 
 	// sdk clients
 	SDK *fabsdk.FabricSDK
@@ -36,60 +36,44 @@ type AdminClient struct {
 	// for create channel
 	// ChannelConfig string
 	// OrdererID string
-
-	valid bool
 }
 
-func InitAdminClient(params *types.AdminParams, pairs ...types.EnvPair) {
-	adminParams = params
-	for _, pair := range pairs {
+func GetAdminClient(params *types.AdminParams, envPairs ...types.EnvPair) (*AdminClient, error) {
+	// todo: params 检查合法性，如文件是否存在
+
+	for _, pair := range envPairs {
 		// such as "DISCOVERY_AS_LOCALHOST"
 		_ = os.Setenv(pair.Key, pair.Val)
 	}
-}
 
-var (
-	adminParams *types.AdminParams
-)
-
-func GetAdminClient() (*AdminClient, error) {
-	if adminParams.ConfigPath == "" {
-		return nil, fmt.Errorf("Please init the params by call SerParams() function.")
-	}
-
-	sdk, err := fabsdk.New(config.FromFile(adminParams.ConfigPath))
+	sdk, err := fabsdk.New(config.FromFile(params.ConfigPath))
 	if err != nil {
-		log.Panicf("failed to create fabric sdk: %s", err)
+		return nil, fmt.Errorf("failed to create fabric sdk: %s", err)
 	}
 
-	rcp := sdk.Context(fabsdk.WithUser(adminParams.OrgAdmin), fabsdk.WithOrg(adminParams.OrgName))
+	rcp := sdk.Context(fabsdk.WithUser(params.OrgAdmin), fabsdk.WithOrg(params.OrgName))
 	rc, err := resmgmt.New(rcp)
 	if err != nil {
-		log.Panicf("failed to create resource client: %s", err)
+		return nil, fmt.Errorf("failed to create resource client: %s", err)
 	}
 
 	mc, err := msp.New(sdk.Context())
 	if err != nil {
-		log.Panicf("failed to create msp client: %s", err)
+		return nil, fmt.Errorf("failed to create msp client: %s", err)
 	}
 
 	admin := new(AdminClient)
 
-	admin.AdminParams = adminParams
+	admin.metadata = params
 	admin.SDK = sdk
 	admin.RC = rc
 	admin.MC = mc
 	admin.ACs = make(map[string]*appClient)
-	admin.valid = true
 
 	return admin, nil
 }
 
 func (admin *AdminClient) GetAppClient(channelID string) (*appClient, error) {
-
-	if !admin.valid {
-		return nil, fmt.Errorf("admin client is not valid now.\n")
-	}
 
 	if app, ok := admin.ACs[channelID]; ok {
 		log.Printf("app client of %s has existed, return directly.\n", channelID)
@@ -101,7 +85,7 @@ func (admin *AdminClient) GetAppClient(channelID string) (*appClient, error) {
 	app, err := admin.getAppClient(channelID)
 
 	if err != nil {
-		log.Fatalf("failed to app client %s.\n", channelID)
+		return nil, fmt.Errorf("failed to get app client with error %s.\n", err)
 	}
 
 	admin.ACs[channelID] = app
@@ -109,43 +93,8 @@ func (admin *AdminClient) GetAppClient(channelID string) (*appClient, error) {
 	return app, nil
 }
 
-func (admin *AdminClient) Exit() {
-	admin.AdminParams = nil
-	admin.SDK = nil
-	admin.MC = nil
-	admin.RC = nil
-
-	for key := range admin.ACs {
-		delete(admin.ACs, key)
-	}
-	admin.ACs = nil
-	admin.valid = false
-
-	adminParams = nil
-}
-
-func (admin *AdminClient) ExitApp(channelID string) error {
-	if !admin.valid {
-		return fmt.Errorf("admin client is not valid now.\n")
-	}
-	app, ok := admin.ACs[channelID]
-	if !ok {
-		return fmt.Errorf("app client of %s has existed, return directly.\n", channelID)
-	}
-
-	delete(admin.ACs, channelID)
-
-	app.exit()
-
-	return nil
-}
-
-func (admin *AdminClient) IsValid() bool {
-	return admin.valid
-}
-
 func (admin *AdminClient) getAppClient(channelID string) (*appClient, error) {
-	ccp := admin.SDK.ChannelContext(channelID, fabsdk.WithUser(admin.OrgAdmin))
+	ccp := admin.SDK.ChannelContext(channelID, fabsdk.WithUser(admin.metadata.OrgAdmin))
 	cc, err := channel.New(ccp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create channel client: %s", err)
@@ -168,11 +117,4 @@ func (admin *AdminClient) getAppClient(channelID string) (*appClient, error) {
 	app.LC = lc
 
 	return app, nil
-}
-
-func (app *appClient) exit() {
-	app.ChannelID = ""
-	app.CC = nil
-	app.EC = nil
-	app.LC = nil
 }

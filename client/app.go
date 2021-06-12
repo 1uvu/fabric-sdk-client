@@ -3,36 +3,26 @@ package client
 import (
 	"errors"
 	"fmt"
-	"github.com/1uvu/fabric-sdk-client/types"
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/1uvu/fabric-sdk-client/types"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 )
 
 type AppClient struct {
-	*types.AppParams
+	metadata *types.AppParams
 	*gateway.Network
-	valid bool
 }
 
-var (
-	appParams *types.AppParams
-)
+func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.EnvPair) (*AppClient, error) {
+	// todo: params 检查合法性，如文件是否存在
 
-func InitAppClient(params *types.AppParams, pairs ...types.EnvPair) {
-	appParams = params
-	for _, pair := range pairs {
+	for _, pair := range envPairs {
 		// such as "DISCOVERY_AS_LOCALHOST"
 		_ = os.Setenv(pair.Key, pair.Val)
-	}
-}
-
-func GetAppClient(channelID string) (*AppClient, error) {
-	if appParams == nil {
-		return nil, fmt.Errorf("please init the %s client firstly by call `InitAppClient()`.\n", channelID)
 	}
 
 	wallet, err := gateway.NewFileSystemWallet("wallet")
@@ -42,7 +32,7 @@ func GetAppClient(channelID string) (*AppClient, error) {
 	}
 
 	if !wallet.Exists("appUser") {
-		err = populateWallet(wallet)
+		err = populateWallet(wallet, params)
 		if err != nil {
 			fmt.Printf("Failed to populate wallet contents: %s\n", err)
 			os.Exit(1)
@@ -50,7 +40,7 @@ func GetAppClient(channelID string) (*AppClient, error) {
 	}
 
 	gw, err := gateway.Connect(
-		gateway.WithConfig(config.FromFile(filepath.Clean(appParams.ConfigPath))),
+		gateway.WithConfig(config.FromFile(filepath.Clean(params.ConfigPath))),
 		gateway.WithIdentity(wallet, "appUser"),
 	)
 	if err != nil {
@@ -65,31 +55,18 @@ func GetAppClient(channelID string) (*AppClient, error) {
 		os.Exit(1)
 	}
 
-	return &AppClient{AppParams: appParams, Network: network, valid: true}, nil
+	return &AppClient{metadata: params, Network: network}, nil
 }
 
-func (app *AppClient) IsValid() bool {
-	return app.valid
-}
-
-func (app *AppClient) Exit() {
-	app.Network = nil
-	app.AppParams = nil
-	app.valid = false
-
-	appParams = nil
-}
-
-func populateWallet(wallet *gateway.Wallet) error {
-	// todo run.sh 给予警告
+func populateWallet(wallet *gateway.Wallet, params *types.AppParams) error {
 	// read the certificate pem
-	cert, err := ioutil.ReadFile(filepath.Clean(appParams.CertPath))
+	cert, err := ioutil.ReadFile(filepath.Clean(params.CertPath))
 	if err != nil {
 		return err
 	}
 
 	// there's a single file in this dir containing the private key
-	keyDir := filepath.Join(appParams.CredPath, "keystore")
+	keyDir := filepath.Join(params.CredPath, "keystore")
 	files, err := ioutil.ReadDir(keyDir)
 	if err != nil {
 		return err
@@ -103,7 +80,7 @@ func populateWallet(wallet *gateway.Wallet) error {
 		return err
 	}
 
-	identity := gateway.NewX509Identity(appParams.OrgMSP, string(cert), string(key))
+	identity := gateway.NewX509Identity(params.OrgMSP, string(cert), string(key))
 
 	err = wallet.Put("appUser", identity)
 	if err != nil {

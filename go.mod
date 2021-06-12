@@ -1,5 +1,6 @@
 module github.com/1uvu/fabric-sdk-client
 
+go 1.15
 
 require (
 	github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23 // indirect
