@@ -2,6 +2,9 @@ package client
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/1uvu/fabric-sdk-client/types"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
@@ -11,8 +14,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"log"
-	"os"
 )
 
 type appClient struct {
@@ -76,16 +77,16 @@ func GetAdminClient(params *types.AdminParams, envPairs ...types.EnvPair) (*Admi
 func (admin *AdminClient) GetAppClient(channelID string) (*appClient, error) {
 
 	if app, ok := admin.ACs[channelID]; ok {
-		log.Printf("app client of %s has existed, return directly.\n", channelID)
+		log.Printf("app client of %s has existed, return directly", channelID)
 		return app, nil
 	}
 
-	log.Printf("app client of %s do not existed, get it now.\n", channelID)
+	log.Printf("app client of %s do not existed, get it now", channelID)
 
 	app, err := admin.getAppClient(channelID)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get app client with error %s.\n", err)
+		return nil, fmt.Errorf("failed to get app client with error %s", err)
 	}
 
 	admin.ACs[channelID] = app
@@ -117,4 +118,25 @@ func (admin *AdminClient) getAppClient(channelID string) (*appClient, error) {
 	app.LC = lc
 
 	return app, nil
+}
+
+// 这是一个非常简单的封装, 如需定义更多参数, 请直接使用 client 按照官方 sdk 定制
+func (app *appClient) InvokeChaincode(params *types.InvokeParams) (result []byte, err error) {
+	req := channel.Request{
+		ChaincodeID: params.ChaincodeID,
+		Fcn:         params.Fcn,
+		Args:        params.Args,
+	}
+
+	reqPeers := channel.WithTargetEndpoints(params.Endpoints...)
+
+	resp := *new(channel.Response)
+	if params.NeedSubmit {
+		resp, err = app.CC.Execute(req, reqPeers)
+	} else {
+		resp, err = app.CC.Query(req)
+	}
+
+	result = resp.Payload
+	return result, err
 }

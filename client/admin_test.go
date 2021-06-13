@@ -2,10 +2,14 @@ package client
 
 import (
 	"fmt"
-	"github.com/1uvu/fabric-sdk-client/types"
+	"log"
 	"path/filepath"
 	"testing"
+
+	"github.com/1uvu/fabric-sdk-client/types"
 )
+
+var admin *AdminClient
 
 func TestGetAdminClient(t *testing.T) {
 	fmt.Println("testing admin client")
@@ -13,6 +17,8 @@ func TestGetAdminClient(t *testing.T) {
 	var (
 		basePath string = filepath.Join(
 			"..",
+			"..",
+			"Fabric-Demo",
 			"network",
 			"orgs",
 		)
@@ -37,24 +43,33 @@ func TestGetAdminClient(t *testing.T) {
 	}
 
 	envPairs := []types.EnvPair{
-		{"DISCOVERY_AS_LOCALHOST", "true"},
-		{"TEST_IN_SHELL", "false"},
+		{Key: "DISCOVERY_AS_LOCALHOST", Val: "true"},
+		{Key: "TEST_IN_SHELL", Val: "false"},
 	}
 
-	admin, err := GetAdminClient(params, envPairs...)
+	admin2, err := GetAdminClient(params, envPairs...)
 
 	if err != nil {
-		t.Errorf("Failed to get admin client: %s\n", err)
+		t.Errorf("Failed to get admin client: %s", err)
 	}
 
-	err = testGetAppClient(admin)
+	// 全局赋值
+	admin = admin2
+
+	err = testGetAppClient()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = testInvokeChaincode()
 
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func testGetAppClient(admin *AdminClient) error {
+func testGetAppClient() error {
 	// 获取通道的 app client
 	app2, err := admin.GetAppClient("channel2")
 
@@ -73,5 +88,31 @@ func testGetAppClient(admin *AdminClient) error {
 		return fmt.Errorf("app2 not equal _app2")
 	}
 
+	return nil
+}
+
+func testInvokeChaincode() error {
+	// 已 app2 为例, 测试
+	endpoints := []string{
+		"peer0.org1.example.com",
+		"peer0.org2.example.com", // 三者至少包括两个即可
+		"peer0.org3.example.com",
+	}
+	params := &types.InvokeParams{
+		ChaincodeID: "patient",
+		Fcn:         "Query",
+		Args:        [][]byte{[]byte("h1")},
+		NeedSubmit:  false,
+		Endpoints:   endpoints,
+	}
+
+	app, _ := admin.GetAppClient("channel2")
+	result, err := app.InvokeChaincode(params)
+
+	if err != nil {
+		return fmt.Errorf("invoke test failed with error: %s", err)
+	}
+
+	log.Println(string(result))
 	return nil
 }

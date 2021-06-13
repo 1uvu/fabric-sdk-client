@@ -2,18 +2,23 @@ package client
 
 import (
 	"fmt"
-	"github.com/1uvu/fabric-sdk-client/types"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/1uvu/fabric-sdk-client/types"
 )
+
+var app *AppClient
 
 func TestGetAppClient(t *testing.T) {
 	fmt.Println("testing app client")
-
 	var (
 		basePath string = filepath.Join(
 			"..",
+			"..",
+			"Fabric-Demo",
 			"network",
 			"orgs",
 		)
@@ -55,22 +60,43 @@ func TestGetAppClient(t *testing.T) {
 	}
 
 	envPairs := []types.EnvPair{
-		{"DISCOVERY_AS_LOCALHOST", "true"},
-		{"TEST_IN_SHELL", "false"},
+		{Key: "DISCOVERY_AS_LOCALHOST", Val: "true"},
+		{Key: "TEST_IN_SHELL", Val: "false"},
 	}
 
 	// 新建 app user 前要删除当前目录下的 wallet
 	removeWallet()
-	_, err := GetAppClient("channel2", params, envPairs...)
+	app2, err := GetAppClient("channel2", params, envPairs...)
 	if err != nil {
-		t.Errorf("Failed to get app client: %s\n", err)
+		t.Errorf("Failed to get app client: %s", err)
 	}
+
+	// 全局赋值
+	app = app2
 
 	removeWallet()
 	_, err = GetAppClient("channel12", params, envPairs...)
 	if err != nil {
-		t.Errorf("Failed to get app client: %s\n", err)
+		t.Errorf("Failed to get app client: %s", err)
 	}
+}
+
+func TestInvokeChaincode(t *testing.T) {
+	// 已 app2 为例, 测试
+	params := &types.InvokeParams{
+		ChaincodeID: "patient",
+		Fcn:         "Query",
+		Args:        [][]byte{[]byte("h1")},
+		NeedSubmit:  false,
+	}
+
+	result, err := app.InvokeChaincode(params)
+
+	if err != nil {
+		t.Errorf("invoke test failed with error: %s", err)
+	}
+
+	log.Println(string(result))
 }
 
 func removeWallet() {

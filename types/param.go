@@ -20,3 +20,13 @@ type AdminParams struct {
 	OrgMSP     string
 	OrgHost    string
 }
+
+// chaincode invoke params
+type InvokeParams struct {
+	ChaincodeID string
+	Fcn         string
+	Args        [][]byte
+	NeedSubmit  bool
+	// for admin client
+	Endpoints []string
+}

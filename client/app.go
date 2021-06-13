@@ -27,14 +27,14 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 
 	wallet, err := gateway.NewFileSystemWallet("wallet")
 	if err != nil {
-		fmt.Printf("Failed to create wallet: %s\n", err)
+		fmt.Printf("Failed to create wallet: %s", err)
 		os.Exit(1)
 	}
 
 	if !wallet.Exists("appUser") {
 		err = populateWallet(wallet, params)
 		if err != nil {
-			fmt.Printf("Failed to populate wallet contents: %s\n", err)
+			fmt.Printf("Failed to populate wallet contents: %s", err)
 			os.Exit(1)
 		}
 	}
@@ -44,18 +44,33 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 		gateway.WithIdentity(wallet, "appUser"),
 	)
 	if err != nil {
-		fmt.Printf("Failed to connect to gateway: %s\n", err)
+		fmt.Printf("Failed to connect to gateway: %s", err)
 		os.Exit(1)
 	}
 	defer gw.Close()
 
 	network, err := gw.GetNetwork(channelID)
 	if err != nil {
-		fmt.Printf("Failed to get network: %s\n", err)
+		fmt.Printf("Failed to get network: %s", err)
 		os.Exit(1)
 	}
 
 	return &AppClient{metadata: params, Network: network}, nil
+}
+
+func (app *AppClient) InvokeChaincode(params *types.InvokeParams) (result []byte, err error) {
+	contract := app.GetContract(params.ChaincodeID)
+
+	args := make([]string, len(params.Args))
+	for i, a := range params.Args {
+		args[i] = string(a)
+	}
+	if params.NeedSubmit {
+		result, err = contract.SubmitTransaction(params.Fcn, args...)
+	} else {
+		result, err = contract.EvaluateTransaction(params.Fcn, args...)
+	}
+	return result, err
 }
 
 func populateWallet(wallet *gateway.Wallet, params *types.AppParams) error {
@@ -72,7 +87,7 @@ func populateWallet(wallet *gateway.Wallet, params *types.AppParams) error {
 		return err
 	}
 	if len(files) != 1 {
-		return errors.New("keystore folder should have contain one file\n")
+		return errors.New("keystore folder should have contain one file")
 	}
 	keyPath := filepath.Join(keyDir, files[0].Name())
 	key, err := ioutil.ReadFile(filepath.Clean(keyPath))
