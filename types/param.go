@@ -25,7 +25,7 @@ type AdminParams struct {
 type InvokeParams struct {
 	ChaincodeID string
 	Fcn         string
-	Args        [][]byte
+	Args        []string
 	NeedSubmit  bool
 	// for admin client
 	Endpoints []string

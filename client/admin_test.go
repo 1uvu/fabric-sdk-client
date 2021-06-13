@@ -101,7 +101,7 @@ func testInvokeChaincode() error {
 	params := &types.InvokeParams{
 		ChaincodeID: "patient",
 		Fcn:         "Query",
-		Args:        [][]byte{[]byte("h1")},
+		Args:        []string{"h1"},
 		NeedSubmit:  false,
 		Endpoints:   endpoints,
 	}

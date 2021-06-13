@@ -73,7 +73,7 @@ func TestGetAppClient(t *testing.T) {
 
 	// 全局赋值
 	app = app2
-	
+
 	_, err = GetAppClient("channel12", params, envPairs...)
 	if err != nil {
 		t.Errorf("Failed to get app client: %s", err)
@@ -85,7 +85,7 @@ func TestInvokeChaincode(t *testing.T) {
 	params := &types.InvokeParams{
 		ChaincodeID: "patient",
 		Fcn:         "Query",
-		Args:        [][]byte{[]byte("h1")},
+		Args:        []string{"h1"},
 		NeedSubmit:  false,
 	}
 

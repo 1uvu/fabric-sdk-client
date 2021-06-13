@@ -61,14 +61,10 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 func (app *AppClient) InvokeChaincode(params *types.InvokeParams) (result []byte, err error) {
 	contract := app.GetContract(params.ChaincodeID)
 
-	args := make([]string, len(params.Args))
-	for i, a := range params.Args {
-		args[i] = string(a)
-	}
 	if params.NeedSubmit {
-		result, err = contract.SubmitTransaction(params.Fcn, args...)
+		result, err = contract.SubmitTransaction(params.Fcn, params.Args...)
 	} else {
-		result, err = contract.EvaluateTransaction(params.Fcn, args...)
+		result, err = contract.EvaluateTransaction(params.Fcn, params.Args...)
 	}
 	return result, err
 }
