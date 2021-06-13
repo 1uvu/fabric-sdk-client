@@ -98,7 +98,7 @@ func testInvokeChaincode() error {
 		"peer0.org2.example.com", // 三者至少包括两个即可
 		"peer0.org3.example.com",
 	}
-	params := &types.InvokeParams{
+	request := &types.InvokeRequest{
 		ChaincodeID: "patient",
 		Fcn:         "Query",
 		Args:        []string{"h1"},
@@ -107,12 +107,12 @@ func testInvokeChaincode() error {
 	}
 
 	app, _ := admin.GetAppClient("channel2")
-	result, err := app.InvokeChaincode(params)
+	resp, err := app.InvokeChaincode(request)
 
 	if err != nil {
 		return fmt.Errorf("invoke test failed with error: %s", err)
 	}
 
-	log.Println(string(result))
+	log.Println(resp)
 	return nil
 }

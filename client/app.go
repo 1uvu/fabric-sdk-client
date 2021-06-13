@@ -58,15 +58,22 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 	return &AppClient{metadata: params, Network: network}, nil
 }
 
-func (app *AppClient) InvokeChaincode(params *types.InvokeParams) (result []byte, err error) {
-	contract := app.GetContract(params.ChaincodeID)
+// 通过 AppClient 调用链码无法获取 txID 和 statusCode (官方库里面隐藏了)
+// 因为 AppClient 本质上是一个轻量级的 CC Client
+func (app *AppClient) InvokeChaincode(request *types.InvokeRequest) (response *types.InvokeResponse, err error) {
+	contract := app.GetContract(request.ChaincodeID)
 
-	if params.NeedSubmit {
-		result, err = contract.SubmitTransaction(params.Fcn, params.Args...)
+	response = new(types.InvokeResponse)
+	result := []byte{}
+
+	if request.NeedSubmit {
+		result, err = contract.SubmitTransaction(request.Fcn, request.Args...)
 	} else {
-		result, err = contract.EvaluateTransaction(params.Fcn, params.Args...)
+		result, err = contract.EvaluateTransaction(request.Fcn, request.Args...)
 	}
-	return result, err
+	response.Payload = result
+
+	return response, err
 }
 
 func populateWallet(wallet *gateway.Wallet, params *types.AppParams) error {

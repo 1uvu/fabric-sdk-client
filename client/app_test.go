@@ -82,20 +82,20 @@ func TestGetAppClient(t *testing.T) {
 
 func TestInvokeChaincode(t *testing.T) {
 	// 已 app2 为例, 测试
-	params := &types.InvokeParams{
+	request := &types.InvokeRequest{
 		ChaincodeID: "patient",
 		Fcn:         "Query",
 		Args:        []string{"h1"},
 		NeedSubmit:  false,
 	}
 
-	result, err := app.InvokeChaincode(params)
+	resp, err := app.InvokeChaincode(request)
 
 	if err != nil {
 		t.Errorf("invoke test failed with error: %s", err)
 	}
 
-	log.Println(string(result))
+	log.Println(resp)
 }
 
 func removeWallet() {

@@ -121,27 +121,31 @@ func (admin *AdminClient) getAppClient(channelID string) (*appClient, error) {
 }
 
 // 这是一个非常简单的封装, 如需定义更多参数, 请直接使用 client 按照官方 sdk 定制
-func (app *appClient) InvokeChaincode(params *types.InvokeParams) (result []byte, err error) {
-	args := make([][]byte, len(params.Args))
-	for i, a := range params.Args {
+func (app *appClient) InvokeChaincode(request *types.InvokeRequest) (response *types.InvokeResponse, err error) {
+	args := make([][]byte, len(request.Args))
+	for i, a := range request.Args {
 		args[i] = []byte(a)
 	}
 
 	req := channel.Request{
-		ChaincodeID: params.ChaincodeID,
-		Fcn:         params.Fcn,
+		ChaincodeID: request.ChaincodeID,
+		Fcn:         request.Fcn,
 		Args:        args,
 	}
 
-	reqPeers := channel.WithTargetEndpoints(params.Endpoints...)
+	reqPeers := channel.WithTargetEndpoints(request.Endpoints...)
 
 	resp := *new(channel.Response)
-	if params.NeedSubmit {
+	if request.NeedSubmit {
 		resp, err = app.CC.Execute(req, reqPeers)
 	} else {
 		resp, err = app.CC.Query(req)
 	}
 
-	result = resp.Payload
-	return result, err
+	response = new(types.InvokeResponse)
+	response.Payload = resp.Payload
+	response.TransactionID = string(resp.TransactionID)
+	response.ChaincodeStatus = resp.ChaincodeStatus
+
+	return response, err
 }
