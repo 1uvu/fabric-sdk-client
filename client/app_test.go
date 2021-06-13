@@ -73,8 +73,7 @@ func TestGetAppClient(t *testing.T) {
 
 	// 全局赋值
 	app = app2
-
-	removeWallet()
+	
 	_, err = GetAppClient("channel12", params, envPairs...)
 	if err != nil {
 		t.Errorf("Failed to get app client: %s", err)
