@@ -2,21 +2,21 @@ package types
 
 // 用于连接 Fabric 网络的参数
 type AppParams struct {
-	CredPath   string
-	CertPath   string
-	ConfigPath string
-	OrgName    string
-	OrgAdmin   string
-	OrgUser    string
-	OrgMSP     string
-	OrgHost    string
+	OrgName    string `yaml:"orgName"`
+	OrgMSP     string `yaml:"orgMSP"`
+	OrgHost    string `yaml:"orgHost"`
+	OrgAdmin   string `yaml:"orgAdmin"`
+	ConfigPath string `yaml:"configPath"`
+	OrgUser    string `yaml:"orgUser"`
+	CredPath   string `yaml:"credPath"`
+	CretPath   string `yaml:"certPath"`
 }
 
 // 用于连接 Fabric 网络的参数
 type AdminParams struct {
-	ConfigPath string
-	OrgName    string
-	OrgAdmin   string
-	OrgMSP     string
-	OrgHost    string
+	OrgName    string `yaml:"orgName"`
+	OrgMSP     string `yaml:"orgMSP"`
+	OrgHost    string `yaml:"orgHost"`
+	OrgAdmin   string `yaml:"orgAdmin"`
+	ConfigPath string `yaml:"configPath"`
 }
