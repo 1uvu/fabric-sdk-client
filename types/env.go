@@ -1,6 +1,6 @@
 package types
 
 type EnvPair struct {
-	Key string
-	Val string
+	Key string `yaml:"key"`
+	Val string `yaml:"val"`
 }
