@@ -9,7 +9,7 @@ type AppParams struct {
 	ConfigPath string `yaml:"configPath"`
 	OrgUser    string `yaml:"orgUser"`
 	CredPath   string `yaml:"credPath"`
-	CretPath   string `yaml:"certPath"`
+	CertPath   string `yaml:"certPath"`
 }
 
 // 用于连接 Fabric 网络的参数
