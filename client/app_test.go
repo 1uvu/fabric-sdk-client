@@ -95,7 +95,10 @@ func TestInvokeChaincode(t *testing.T) {
 		t.Errorf("invoke test failed with error: %s", err)
 	}
 
-	log.Println(resp)
+	log.Println("get the response as follows.")
+	log.Println("payload: ", string(resp.Payload))
+	log.Println("tx info: ", resp.TransactionInfo)
+	log.Println("status code: ", resp.ChaincodeStatus)
 }
 
 func removeWallet() {

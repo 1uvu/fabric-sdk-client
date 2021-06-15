@@ -63,17 +63,18 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 func (app *AppClient) InvokeChaincode(request *types.InvokeRequest) (response *types.InvokeResponse, err error) {
 	contract := app.GetContract(request.ChaincodeID)
 
-	response = new(types.InvokeResponse)
-	result := []byte{}
+	var result []byte
 
 	if request.NeedSubmit {
 		result, err = contract.SubmitTransaction(request.Fcn, request.Args...)
 	} else {
 		result, err = contract.EvaluateTransaction(request.Fcn, request.Args...)
 	}
-	response.Payload = result
 
-	return response, err
+	return &types.InvokeResponse{
+		Payload:         result,
+		TransactionInfo: types.NewTransactionInfo("", app.metadata.OrgName),
+	}, err
 }
 
 func populateWallet(wallet *gateway.Wallet, params *types.AppParams) error {

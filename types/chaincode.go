@@ -13,6 +13,6 @@ type InvokeRequest struct {
 // chaincode invoke response
 type InvokeResponse struct {
 	Payload         []byte
-	TransactionID   string
+	TransactionInfo *TransactionInfo
 	ChaincodeStatus int32
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
@@ -18,6 +19,8 @@ import (
 
 type appClient struct {
 	ChannelID string
+
+	metadata *types.AdminParams
 
 	CC *channel.Client
 	EC *event.Client
@@ -113,6 +116,7 @@ func (admin *AdminClient) getAppClient(channelID string) (*appClient, error) {
 
 	app := new(appClient)
 	app.ChannelID = channelID
+	app.metadata = admin.metadata
 	app.CC = cc
 	app.EC = ec
 	app.LC = lc
@@ -142,10 +146,47 @@ func (app *appClient) InvokeChaincode(request *types.InvokeRequest) (response *t
 		resp, err = app.CC.Query(req)
 	}
 
-	response = new(types.InvokeResponse)
-	response.Payload = resp.Payload
-	response.TransactionID = string(resp.TransactionID)
-	response.ChaincodeStatus = resp.ChaincodeStatus
+	return &types.InvokeResponse{
+		Payload:         resp.Payload,
+		TransactionInfo: types.NewTransactionInfo(string(resp.TransactionID), app.metadata.OrgName),
+		ChaincodeStatus: resp.ChaincodeStatus,
+	}, err
+}
 
-	return response, err
+func (app *appClient) QueryBlockInfoByTxID(txid string) (*types.BlockInfo, error) {
+	block, err := app.LC.QueryBlockByTxID(fab.TransactionID(txid))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.BlockInfo{
+		BlockNumber:  block.Header.Number,
+		DataHash:     block.Header.DataHash,
+		PreviousHash: block.Header.PreviousHash,
+	}, nil
+}
+
+func (app *appClient) QueryChannelInfo() (*types.ChannelInfo, error) {
+	channelCfg, err := app.LC.QueryConfig()
+
+	if err != nil {
+		return nil, err
+	}
+
+	chainInfo, err := app.LC.QueryInfo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.ChannelInfo{
+		ChannelID:         channelCfg.ID(),
+		Height:            chainInfo.BCI.Height,
+		CurrentBlockHash:  chainInfo.BCI.CurrentBlockHash,
+		PreviousBlockHash: chainInfo.BCI.PreviousBlockHash,
+		Orderers:          channelCfg.Orderers(),
+		Endorser:          chainInfo.Endorser,
+		Status:            chainInfo.Status,
+	}, nil
 }
