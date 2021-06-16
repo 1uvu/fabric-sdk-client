@@ -31,7 +31,7 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 		os.Exit(1)
 	}
 
-	if !wallet.Exists("appUser") {
+	if !wallet.Exists("appUser" + params.OrgName) {
 		err = populateWallet(wallet, params)
 		if err != nil {
 			fmt.Printf("Failed to populate wallet contents: %s", err)
@@ -41,7 +41,7 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 
 	gw, err := gateway.Connect(
 		gateway.WithConfig(config.FromFile(filepath.Clean(params.ConfigPath))),
-		gateway.WithIdentity(wallet, "appUser"),
+		gateway.WithIdentity(wallet, "appUser"+params.OrgName),
 	)
 	if err != nil {
 		fmt.Printf("Failed to connect to gateway: %s", err)
@@ -101,7 +101,7 @@ func populateWallet(wallet *gateway.Wallet, params *types.AppParams) error {
 
 	identity := gateway.NewX509Identity(params.OrgMSP, string(cert), string(key))
 
-	err = wallet.Put("appUser", identity)
+	err = wallet.Put("appUser"+params.OrgName, identity)
 	if err != nil {
 		return err
 	}

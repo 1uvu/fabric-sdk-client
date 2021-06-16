@@ -14,6 +14,10 @@ var app *AppClient
 
 func TestGetAppClient(t *testing.T) {
 	fmt.Println("testing app client")
+
+	// 首先要清空 wallet, 否则会出错
+	removeWallet()
+
 	var (
 		basePath string = filepath.Join(
 			"..",
@@ -64,11 +68,9 @@ func TestGetAppClient(t *testing.T) {
 		{Key: "TEST_IN_SHELL", Val: "false"},
 	}
 
-	// 新建 app user 前要删除当前目录下的 wallet
-	removeWallet()
 	app2, err := GetAppClient("channel2", params, envPairs...)
 	if err != nil {
-		t.Errorf("Failed to get app client: %s", err)
+		t.Errorf("Failed to get app2 client: %s", err)
 	}
 
 	// 全局赋值
@@ -76,7 +78,36 @@ func TestGetAppClient(t *testing.T) {
 
 	_, err = GetAppClient("channel12", params, envPairs...)
 	if err != nil {
-		t.Errorf("Failed to get app client: %s", err)
+		t.Errorf("Failed to get app12 client: %s", err)
+	}
+
+	params.OrgName = "Org1"
+	params.OrgMSP = "Org1MSP"
+	params.OrgHost = "org1.example.com"
+	configName = "app-org1.yaml"
+
+	params.CredPath = filepath.Join(
+		basePath,
+		"peerOrganizations",
+		params.OrgHost,
+		"users",
+		fmt.Sprintf("%s@%s", orgUser, params.OrgHost),
+		"msp",
+	)
+	params.CertPath = filepath.Join(
+		params.CredPath,
+		"signcerts",
+		fmt.Sprintf("%s@%s-cert.pem", orgUser, params.OrgHost),
+	)
+	params.ConfigPath = filepath.Join(
+		basePath,
+		"app",
+		configName,
+	)
+
+	_, err = GetAppClient("channel1", params, envPairs...)
+	if err != nil {
+		t.Errorf("Failed to get app1 client: %s", err)
 	}
 }
 
@@ -102,6 +133,6 @@ func TestInvokeChaincode(t *testing.T) {
 }
 
 func removeWallet() {
-	_ = os.RemoveAll("./keystore/")
-	_ = os.RemoveAll("./wallet/")
+	_ = os.Remove("./keystore")
+	_ = os.Remove("./wallet")
 }
