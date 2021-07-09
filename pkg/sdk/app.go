@@ -7,7 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/1uvu/fabric-sdk-client/pkg/types"
+	"fabric-sdk-client/pkg/types"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 )
@@ -18,10 +19,8 @@ type AppClient struct {
 }
 
 func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.EnvPair) (*AppClient, error) {
-	// todo: params 检查合法性，如文件是否存在
-
 	for _, pair := range envPairs {
-		// such as "DISCOVERY_AS_LOCALHOST"
+		// i.e. "DISCOVERY_AS_LOCALHOST = true"
 		_ = os.Setenv(pair.Key, pair.Val)
 	}
 
@@ -56,6 +55,10 @@ func GetAppClient(channelID string, params *types.AppParams, envPairs ...types.E
 	}
 
 	return &AppClient{metadata: params, Network: network}, nil
+}
+
+func (app *AppClient) Metadata() types.AppParams {
+	return *app.metadata
 }
 
 // 通过 AppClient 调用链码无法获取 txID 和 statusCode (官方库里面隐藏了)

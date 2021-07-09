@@ -4,10 +4,12 @@ A simple wrapper for Hyperledger Fabric SDK
 
 ## Features
 
-- [x] [admin](./client/admin.go)：提供 `GetAdminClient` 和 `admin.GetAppClient` 接口
-- [x] [app](./client/app.go)：提供 `GetAppClient` 接口
+- [x] [pkg/client](./pkg/client)：提供 App 和 Admin Client 的并发单例访问功能
+- [x] [pkg/config](./pkg/config)：解析 Client 配置文件
+- [x] [pkg/sdk](./pkg/sdk)：对 Fabric-SDK Client 的包装
+- [x] [pkg/types](./pkg/types)：类型定义
 
-## Todo 
+## Todo
 
 进行更加细致的包装 (基于上面的两种 Client)，包括：
 

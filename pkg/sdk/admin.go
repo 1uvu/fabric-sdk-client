@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/1uvu/fabric-sdk-client/pkg/types"
+	"fabric-sdk-client/pkg/types"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
@@ -43,8 +44,6 @@ type AdminClient struct {
 }
 
 func GetAdminClient(params *types.AdminParams, envPairs ...types.EnvPair) (*AdminClient, error) {
-	// todo: params 检查合法性，如文件是否存在
-
 	for _, pair := range envPairs {
 		// such as "DISCOVERY_AS_LOCALHOST"
 		_ = os.Setenv(pair.Key, pair.Val)
@@ -75,6 +74,10 @@ func GetAdminClient(params *types.AdminParams, envPairs ...types.EnvPair) (*Admi
 	admin.ACs = make(map[string]*appClient)
 
 	return admin, nil
+}
+
+func (admin *AdminClient) Metadata() types.AdminParams {
+	return *admin.metadata
 }
 
 func (admin *AdminClient) GetAppClient(channelID string) (*appClient, error) {
@@ -122,6 +125,10 @@ func (admin *AdminClient) getAppClient(channelID string) (*appClient, error) {
 	app.LC = lc
 
 	return app, nil
+}
+
+func (app *appClient) Metadata() types.AdminParams {
+	return *app.metadata
 }
 
 // 这是一个非常简单的封装, 如需定义更多参数, 请直接使用 client 按照官方 sdk 定制

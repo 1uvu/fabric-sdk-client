@@ -2,6 +2,7 @@ package client
 
 import (
 	"log"
+	"os"
 	"testing"
 )
 
@@ -11,6 +12,9 @@ var (
 )
 
 func TestGetApp(t *testing.T) {
+	// 首先要清空 wallet, 否则会出错
+	removeWallet()
+
 	app2, err := GetApp("channel2", clientConfigPath2)
 
 	if err != nil {
@@ -70,4 +74,9 @@ func TestGetAdmin(t *testing.T) {
 	log.Println("admin2 == nil: ", admin2 == nil)
 	log.Println("admin2 == _admin2: ", admin2 == _admin2)
 	log.Println("admin2 == admin1: ", admin2 == admin1)
+}
+
+func removeWallet() {
+	_ = os.Remove("./keystore")
+	_ = os.Remove("./wallet")
 }

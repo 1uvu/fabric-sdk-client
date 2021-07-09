@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/1uvu/fabric-sdk-client/pkg/config"
-	"github.com/1uvu/fabric-sdk-client/pkg/sdk"
+	"fabric-sdk-client/pkg/config"
+	"fabric-sdk-client/pkg/sdk"
 )
 
 //
@@ -78,7 +78,7 @@ func newApp(channelID, clientConfigPath string) (*sdk.AppClient, error) {
 
 func newAdmin(clientConfigPath string) (*sdk.AdminClient, error) {
 
-	conf, err := newClientConfig(clientConfigPath)
+	conf, err := config.NewClientConfig(clientConfigPath)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get app client: %s", err)

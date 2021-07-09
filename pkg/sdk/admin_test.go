@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/1uvu/fabric-sdk-client/pkg/types"
+	"fabric-sdk-client/pkg/types"
 )
 
 var (
@@ -51,6 +51,7 @@ func TestGetAdminClient(t *testing.T) {
 	envPairs := []types.EnvPair{
 		{Key: "DISCOVERY_AS_LOCALHOST", Val: "true"},
 		{Key: "TEST_IN_SHELL", Val: "false"},
+		{Key: "CRYPTO_CONFIG_BASE_PATH", Val: "/home/zjh/Projects/Fabric/Fabric-Demo/network/orgs"},
 	}
 
 	admin2, err := GetAdminClient(params, envPairs...)
