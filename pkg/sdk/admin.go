@@ -1,11 +1,11 @@
-package client
+package sdk
 
 import (
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/1uvu/fabric-sdk-client/types"
+	"github.com/1uvu/fabric-sdk-client/pkg/types"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"

@@ -1,4 +1,4 @@
-package client
+package sdk
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/1uvu/fabric-sdk-client/types"
+	"github.com/1uvu/fabric-sdk-client/pkg/types"
 )
 
 var app *AppClient
@@ -20,6 +20,7 @@ func TestGetAppClient(t *testing.T) {
 
 	var (
 		basePath string = filepath.Join(
+			"..",
 			"..",
 			"..",
 			"Fabric-Demo",

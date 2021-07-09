@@ -1,4 +1,4 @@
-package client
+package sdk
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/1uvu/fabric-sdk-client/types"
+	"github.com/1uvu/fabric-sdk-client/pkg/types"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 )

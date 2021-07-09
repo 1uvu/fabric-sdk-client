@@ -1,4 +1,4 @@
-package client
+package sdk
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/1uvu/fabric-sdk-client/types"
+	"github.com/1uvu/fabric-sdk-client/pkg/types"
 )
 
 var (
@@ -21,6 +21,7 @@ func TestGetAdminClient(t *testing.T) {
 
 	var (
 		basePath string = filepath.Join(
+			"..",
 			"..",
 			"..",
 			"Fabric-Demo",
