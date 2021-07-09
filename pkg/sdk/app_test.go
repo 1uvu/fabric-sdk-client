@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fabric-sdk-client/pkg/types"
+	"github.com/1uvu/fabric-sdk-client/pkg/types"
 )
 
 var app *AppClient

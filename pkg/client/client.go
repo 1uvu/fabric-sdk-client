@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"fabric-sdk-client/pkg/config"
-	"fabric-sdk-client/pkg/sdk"
+	"github.com/1uvu/fabric-sdk-client/pkg/config"
+	"github.com/1uvu/fabric-sdk-client/pkg/sdk"
 )
 
 //

@@ -1,4 +1,4 @@
-module fabric-sdk-client
+module github.com/1uvu/fabric-sdk-client
 
 go 1.15
 

@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"fabric-sdk-client/pkg/types"
+	"github.com/1uvu/fabric-sdk-client/pkg/types"
 
 	"gopkg.in/yaml.v2"
 )
