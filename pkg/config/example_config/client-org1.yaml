@@ -1,0 +1,42 @@
+---
+version: 1.0
+
+global:
+  - key: CRYPTO_CONFIG_BASE_PATH
+    val: /home/zjh/Projects/Fabric/Fabric-Demo/network/orgs
+  
+admin:
+  params:
+    orgName: Org1
+    orgMSP: Org1MSP
+    orgHost: org1.example.com
+    orgAdmin: Admin
+    # configPath: ${CRYPTO_CONFIG_BASE_PATH}/admin/admin-org1.yaml
+    configPath: ./admin-org1.yaml
+  envs:
+    - key: DISCOVERY_AS_LOCALHOST
+      val: true
+    - key: TEST_IN_SHELL
+      val: false
+    - key: CRYPTO_CONFIG_BASE_PATH
+      val: ${CRYPTO_CONFIG_BASE_PATH}
+
+app:
+  params:
+    orgName: Org1
+    orgMSP: Org1MSP
+    orgHost: org1.example.com
+    orgAdmin: Admin
+    # configPath: ${CRYPTO_CONFIG_BASE_PATH}/app/app-org1.yaml
+    configPath: ./app-org1.yaml
+
+    orgUser: User1
+    credPath: ${CRYPTO_CONFIG_BASE_PATH}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp
+    certPath: ${CRYPTO_CONFIG_BASE_PATH}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem
+  envs:
+    - key: DISCOVERY_AS_LOCALHOST
+      val: true
+    - key: TEST_IN_SHELL
+      val: false
+    - key: CRYPTO_CONFIG_BASE_PATH
+      val: ${CRYPTO_CONFIG_BASE_PATH}
